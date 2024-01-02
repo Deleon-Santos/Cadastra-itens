@@ -1,9 +1,10 @@
+#Estou desenvolvendo um sistema que colete dados e transforme numa planilha eletronica
 import PySimpleGUI as sg
 import pandas as pd
 lista = [
     
 ]
-titulos = ["N°", "Item", "EAN", "Descrição do Produto", "QTD", "Preço"]
+titulos = ["Item", "      EAN    ", "    Descrição do Produto    ", " QTD ", " Preço "]
 
 tabela = [
     [sg.Table(values=lista, headings=titulos, max_col_width=10, auto_size_columns=True,
@@ -32,7 +33,7 @@ layout = [
     [sg.Col(entradas), sg.Col(tabela)],
 ]
 
-window = sg.Window("Tabela com valores", layout, size=(810, 400), resizable=True)
+window = sg.Window("Tabela com valores", layout, size=(1020, 400), resizable=True)
 
 while True:
     event, values = window.read()
