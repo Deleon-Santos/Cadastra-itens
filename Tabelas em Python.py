@@ -7,8 +7,8 @@ lista = [
 titulos = ["Item", "      EAN    ", "    Descrição do Produto    ", " QTD ", " Preço "]
 
 tabela = [
-    [sg.Table(values=lista, headings=titulos, max_col_width=10, auto_size_columns=True,
-              display_row_numbers=True, justification="right", num_rows=30, key="-TABELA-", row_height=12)],
+    [sg.Table(values=lista, headings=titulos, max_col_width=12, auto_size_columns=True,
+              display_row_numbers=False, justification="right", num_rows=20, key="-TABELA-", row_height=15)],
 ]
 
 entradas = [
@@ -17,7 +17,7 @@ entradas = [
     [sg.Text("")],
     [sg.Text("")],
 
-    [sg.Text("Numero", size=(15, 1),font=("Any",12)), sg.Input(size=(15, 1),font=("Any",12), key="-N-")],
+    #[sg.Text("Numero", size=(15, 1),font=("Any",12)), sg.Input(size=(15, 1),font=("Any",12), key="-N-")],
     [sg.Text("Item", size=(15, 1),font=("Any",12)), sg.Input(size=(15, 1),font=("Any",12), key="-ITEM-")],
     [sg.Text("Ean", size=(15, 1),font=("Any",12)), sg.Input(size=(15, 1),font=("Any",12), key="-EAN-")],
     [sg.Text("Descrição", size=(15, 1),font=("Any",12)), sg.Input(size=(15, 1),font=("Any",12), key="-DESC-")],
@@ -43,7 +43,7 @@ while True:
     elif event == "REGISTRAR":
         # Obter valores dos campos de entrada
         novo_registro = [
-            values["-N-"],
+            #values["-N-"],
             values["-ITEM-"],
             values["-EAN-"],
             values["-DESC-"],
@@ -56,16 +56,18 @@ while True:
 
         # Atualizar a tabela com os novos valores
         window["-TABELA-"].update(values=lista)
+        #novo_registro.clear()
 
 
-    elif event == "GERAR PLANILHA":
+
+    elif event == "PLANILHA":
         df = pd.DataFrame(lista[1:], columns=titulos)
         file_path = sg.popup_get_file("Salvar Planilha com Python", save_as=True, default_extension=".xlsx")
         
         if file_path:
             with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
                 df.to_excel(writer, index=False)
-                pd.save()
+                #pd.save()
         sg.popup("Planilha salva")
 
 window.close()
