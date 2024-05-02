@@ -1,10 +1,10 @@
-#Estou desenvolvendo um sistema que colete dados e transforme numa planilha eletronica
+#Estou desenvolvendo um sistema integrado ao bd SQL que colete dados e transforme numa planilha eletronica
 import PySimpleGUI as sg
 import pandas as pd
 import mysql.connector
 lista = []
 
-
+#Definição do thema para a janela
 sg.SetOptions(
                 background_color='#363636', 
                 text_element_background_color='#363636',
@@ -12,6 +12,7 @@ sg.SetOptions(
                 scrollbar_color=None, input_elements_background_color='#F7F3EC', 
                 button_color=('white', '#4F4F4F'))#Configuração de thema da janela
 
+#Definição dp layout da pagina 
 titulos = ["Item", "    EAN   ", " QTD ", " Preço ","Descrição do Produto"]
 
 imagem = [[sg.Image(filename="imagem_login.png")],]
@@ -34,7 +35,10 @@ layout = [
      display_row_numbers=False, justification="center", num_rows=20, key="-TABELA-", row_height=15),sg.P()],
 ]
 janela=[[sg.Frame("",layout)],]
+
 window = sg.Window("Tabela com valores", janela, size=(700, 670))
+
+#conexaão com o banco de dados MySQL
 db_connection = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -51,29 +55,34 @@ while True:
         break
         
     elif event == "REGISTRAR": # Obter valores dos campos de entrada
-        novo_registro = [
-            values["-ITEM-"],
-            values["-EAN-"],
+        try:
+            item=int(values["-ITEM-"].strip())
+            ean=int(values["-EAN-"].strip())
+            qtd=int(values["-QTD-"].strip())
+            valor=float(values["-PRECO-"].strip())
+            descricao=str(values["-DESC-"].strip().upper())
+        except ValueError:
+            sg.popup('Erro em valores. ')
+            continue
+
+        if not item or not ean or not qtd or not valor or not descricao:#validação dos valores
+            sg.popup('Deve preencher todos os campos')
+        else:
+            novo_registro=[item,ean,qtd,valor,descricao]
+            lista.append(novo_registro)
+            window["-TABELA-"].update(values=lista)
+
+            insert_query = "INSERT INTO novo_item (itemId, ean,  qtd, valor, descricao) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(insert_query, novo_registro)
+            db_connection.commit()
+
+            select_query = "SELECT itemId, ean,  qtd, valor, descricao FROM novo_item"
+            cursor.execute(select_query)
+            retrieved_data = cursor.fetchall()
+
+            lista = [list(row) for row in retrieved_data]
             
-            values["-QTD-"],
-            values["-PRECO-"],
-            values["-DESC-"],]
-
-        lista.append(novo_registro)
-        window["-TABELA-"].update(values=lista)
-
-        insert_query = "INSERT INTO novo_item (itemId, ean,  qtd, valor, descricao) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(insert_query, novo_registro)
-        db_connection.commit()
-
-        select_query = "SELECT itemId, ean,  qtd, valor, descricao FROM novo_item"
-        cursor.execute(select_query)
-        retrieved_data = cursor.fetchall()
-
-        
-        lista = [list(row) for row in retrieved_data]
-        
-        window["-TABELA-"].update(values=lista)
+            window["-TABELA-"].update(values=lista)
 
     elif event =="PESQUISAR":
         select_query = "SELECT itemId, ean, qtd, valor, descricao FROM novo_item ORDER BY itemId ASC"
@@ -83,7 +92,7 @@ while True:
         lista = [list(row) for row in retrieved_data]
         window["-TABELA-"].update(values=lista)
 
-    elif event == "PLANILHA":
+    elif event == "PLANILHA":#definição da tabela em excel
         tabela = pd.DataFrame(lista[0:], columns=titulos)
         documento = sg.popup_get_file("novo_item", save_as=True, default_extension=".xlsx")
         
