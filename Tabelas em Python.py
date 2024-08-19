@@ -1,7 +1,7 @@
 #Estou desenvolvendo um sistema integrado ao bd SQL que colete dados e transforme numa planilha eletronica
 import PySimpleGUI as sg
 import pandas as pd
-import mysql.connector
+import mysql.connector 
 lista = []
 
 #Definição do thema para a janela
@@ -60,7 +60,7 @@ while True:
             ean=int(values["-EAN-"].strip())
             qtd=int(values["-QTD-"].strip())
             valor=float(values["-PRECO-"].strip())
-            descricao=str(values["-DESC-"].strip().upper())
+            descricao=str(values["-DESC-"].strip().title())
         except ValueError:
             sg.popup('Erro em valores. ')
             continue
@@ -100,5 +100,9 @@ while True:
             with pd.ExcelWriter(documento, engine='openpyxl') as escreve:
                 tabela.to_excel(escreve, index=False)        
         sg.popup("Planilha salva")
+
+
+cursor.close()
+db_connection.close()
 
 window.close()
